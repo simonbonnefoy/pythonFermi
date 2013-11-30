@@ -1,0 +1,107 @@
+import pyLikelihood
+from BinnedAnalysis import *
+from bdlikeSED import *
+from math import log10
+import sys
+
+
+class fermiBinnedAnalysis:
+    """ Class computing the binned likelihood analysis of Fermi data"""
+  
+
+    def __init__(self, src, srcFermi, scFile, gtiFile, ltcubeFile, srcmapsFile, expcubeFile, ccubeFile, irfs, EBIN, EMIN, EMAX, model):
+        self.src=src
+        self.srcFermi = srcFermi
+        self.scFile=scFile
+        self.gtiFile=gtiFile
+        self.ltcubeFile=ltcubeFile
+        self.srcmapsFile=srcmapsFile
+        self.expcubeFile=expcubeFile
+        self.ccubeFile=ccubeFile
+        self.irfs=irfs
+        self.EBIN=EBIN
+        self.EMIN=EMIN
+        self.EMAX=EMAX
+        self.model=model
+
+        global obs 
+        obs = BinnedObs(self.srcmapsFile, self.ltcubeFile, self.expcubeFile, irfs=self.irfs)
+
+    def likelihood1(self, optmz, emin, emax, plot, write, analysisType):
+        """Computing a first likelihood fit."""
+        
+        global obs 
+        obs = BinnedObs(self.srcmapsFile, self.ltcubeFile, self.expcubeFile, irfs=self.irfs)
+        
+        like1 = BinnedAnalysis(obs,self.model,optimizer=optmz)
+        like1.tol = 0.1
+        like1.setEnergyRange(emin, emax)
+        like1.fit(verbosity=1)
+        
+        if plot:
+            like1.plot()
+        if write:
+            like1.logLike.writeXml(str(self.src)+"_model_likehoodFit1.xml")
+        
+
+        if analysisType == 1:
+            preFactor = like1.model[str(self.srcFermi)].funcs['Spectrum'].getParam('Prefactor').value()
+            error = like1.model[str(self.srcFermi)].funcs['Spectrum'].getParam('Prefactor').error()
+            ts = like1.Ts(str(self.srcFermi))
+            print like1.model[str(self.srcFermi)]
+            return (preFactor, error, ts)
+
+
+      
+
+    def likelihood2(self, optmz, write):
+        """ Computig a second likelihood fit needed to compute the SED"""
+       
+        global like2 
+        like2 = BinnedAnalysis(obs,str(self.src)+"_model_likehoodFit1.xml" ,optimizer=optmz)
+        like2.tol = 0.001
+        like2obj = pyLike.NewMinuit(like2.logLike)
+        like2.fit(verbosity=1,covar=True,optObject=like2obj)
+
+        if write:
+            like2.logLike.writeXml(str(self.src)+"_model_likehoodFit2.xml")
+
+
+
+    def SED(self):
+        """Computing the custom bin and the final SED"""
+
+        if self.EBIN==9:
+            print "Working on 9 energy bins"
+            #inputs = likeInput(like2,'_2FGLJ0534.5+2201',nbins=9, model=secondSourceFit)
+            low_edges = [200.,427.69,914.61,1955.87,4182.56,8944.27,19127.05,40902.61]
+            high_edges = [427.69,914.61,1955.87,4182.56,8944.27,19127.05,40902.61,187049.69]
+            
+        else:
+            print "Working on ", self.EBIN, " energy bins"
+            low_edges=[]
+            high_edges=[]
+            energyLow=float(self.EMIN)
+            incremEnergy=(log10(self.EMAX)-log10(self.EMIN))/self.EBIN
+            while energyLow < float(self.EMAX):
+                energyUp = energyLow*(10**(incremEnergy))
+                low_edges.append(float(energyLow))
+                high_edges.append(float(energyUp))
+                energyLow=energyUp
+                print energyLow
+        
+                
+        print "Energy bins created: ", low_edges, high_edges
+        inputs = bdlikeInput(like2,self.gtiFile,self.ccubeFile, self.scFile, \
+                                 self.srcFermi, model=str(self.src)+"_model_likehoodFit2.xml", nbins=self.EBIN)
+        
+        print "input object created"
+        inputs.customBins(low_edges,high_edges)
+        print "custom bin done"
+        inputs.fullFit(CoVar=True)
+        print "full fit done"
+        sed = bdlikeSED(inputs)
+        sed.getECent()
+        sed.fitBands()
+        sed.Plot()
+        
