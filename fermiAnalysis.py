@@ -157,7 +157,7 @@ def likelihoodFit1(analysisType):
             
             binAn=fermiBinnedAnalysis(srcName, "_"+srcNameFermi, scfile, srcName+'_gti_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                           srcName+'_ltcube_'+PHASEMIN+'_'+PHASEMAX+'.fits',  \
-                                          srcName+'_scrmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
+                                          srcName+'_srcmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
                                           srcName+'_expcube_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                           srcName+'_ccube_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
                                           IRFS, EBIN, EMIN, EMAX, modelBinnedPW)
@@ -206,7 +206,7 @@ def likelihoodFit1(analysisType):
 #
         binAn=fermiBinnedAnalysis(srcName, "_"+srcNameFermi, scfile, srcName+'_gti_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                       srcName+'_ltcube_'+PHASEMIN+'_'+PHASEMAX+'.fits',  \
-                                      srcName+'_scrmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
+                                      srcName+'_srcmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
                                       srcName+'_expcube_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                       srcName+'_ccube_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
                                       IRFS, EBIN, EMIN, EMAX, model)

@@ -170,7 +170,7 @@ class preAnalysis:
             cmap=self.srcName+'_ccube_'+self.phaseMin+'_'+self.phaseMax+'.fits',
             srcmdl=model,
             bexpmap=self.srcName+'_allsky_'+self.phaseMin+'_'+self.phaseMax+'.fits',
-            outfile=self.srcName+'_scrmap_'+self.phaseMin+'_'+self.phaseMax+'.fits',
+            outfile=self.srcName+'_srcmap_'+self.phaseMin+'_'+self.phaseMax+'.fits',
             irfs=self.irfs,
             chatter='4',
             emapbnds="no")
