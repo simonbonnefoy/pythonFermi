@@ -69,8 +69,8 @@ class readLikeXML:
 
             if flagSource ==1 and flagSpatial==0 and "parameter" in line:
                 fileWrite.write("\t \t<parameter free=\"1\" max=\"1e6\" min=\"1e-6\" name=\"Prefactor\" scale=\"1e-13\" value=\"1\"/>\n")
-                fileWrite.write("\t \t<parameter free=\"0\" max=\"5.0\" min=\"-5.0\" name=\"Index\" scale=\"1.0\" value=\"-2\"/>\n")
-                scale = "\t \t<parameter free=\"0\" max=\"5e5\" min=\"30\" name=\"Scale\" scale=\"1.0\" value=\""+str(self.pivot)+"\"/>\n"
+                fileWrite.write("\t \t<parameter free=\"1\" max=\"5.0\" min=\"-5.0\" name=\"Index\" scale=\"1.0\" value=\"-2\"/>\n")
+                scale = "\t \t<parameter free=\"1\" max=\"5e5\" min=\"30\" name=\"Scale\" scale=\"1.0\" value=\""+str(self.pivot)+"\"/>\n"
                 fileWrite.write(scale)
                 fileWrite.write(" </spectrum> \n")
                 flagSpatial=1

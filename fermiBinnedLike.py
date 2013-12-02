@@ -23,18 +23,22 @@ class fermiBinnedAnalysis:
         self.EMIN=EMIN
         self.EMAX=EMAX
         self.model=model
+        self.tolerance=0.1
 
         global obs 
         obs = BinnedObs(self.srcmapsFile, self.ltcubeFile, self.expcubeFile, irfs=self.irfs)
-
-    def likelihood1(self, optmz, emin, emax, plot, write, analysisType):
+        
+    def setTolerance(self, tol):
+        self.tolerance=tol
+  
+    def likelihood1(self, optmz, emin, emax, plot, write, analysisType, modelIn):
         """Computing a first likelihood fit."""
         
         global obs 
         obs = BinnedObs(self.srcmapsFile, self.ltcubeFile, self.expcubeFile, irfs=self.irfs)
-        
+        global like1
         like1 = BinnedAnalysis(obs,self.model,optimizer=optmz)
-        like1.tol = 0.01
+        like1.tol = self.tolerance
         like1.setEnergyRange(emin, emax)
         like1.fit(verbosity=1)
         
@@ -46,10 +50,11 @@ class fermiBinnedAnalysis:
 
         if analysisType == 1:
             preFactor = like1.model[str(self.srcFermi)].funcs['Spectrum'].getParam('Prefactor').value()
+            scale = like1.model[str(self.srcFermi)].funcs['Spectrum'].getParam('Scale').value()
             error = like1.model[str(self.srcFermi)].funcs['Spectrum'].getParam('Prefactor').error()
             ts = like1.Ts(str(self.srcFermi))
             print like1.model[str(self.srcFermi)]
-            return (preFactor, error, ts)
+            return (preFactor, scale, error, ts)
 
 
       
@@ -66,7 +71,7 @@ class fermiBinnedAnalysis:
         if write:
             like2.logLike.writeXml(str(self.src)+"_model_likehoodFit2.xml")
 
-
+        
 
     def SED(self):
         """Computing the custom bin and the final SED"""

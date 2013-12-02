@@ -38,9 +38,9 @@ DEC=17.7739
 ####### Analysis parameters ######
 
 ROI=20                                 # Region of interest
-EMIN=100                               # Energy min
+EMIN=100                              # Energy min
 EMAX=100000                            # Energy max
-EBIN=20                                # Bin in energy
+EBIN=10                                # Bin in energy
 ZMAX=100                               # Zenithal angle cut, usually 100 as suggested by Fermi
 PHASEMIN='0.00'                        # Phase min, for pulsar analysis
 PHASEMAX='1.00'                        # Phase max, for pulsar analysis
@@ -157,25 +157,27 @@ def likelihoodFit1(analysisType):
             
             binAn=fermiBinnedAnalysis(srcName, "_"+srcNameFermi, scfile, srcName+'_gti_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                           srcName+'_ltcube_'+PHASEMIN+'_'+PHASEMAX+'.fits',  \
-                                          srcName+'_scrmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
+                                          srcName+'_scrmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',  \
                                           srcName+'_expcube_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                           srcName+'_ccube_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
                                           IRFS, EBIN, EMIN, EMAX, modelBinnedPW)
             
-            preFactor, error, ts = binAn.likelihood1('MINUIT', energyLow, energyUp,0 ,0, analysisType)
+            binAn.setTolerance=0.01
+            binAn.likelihood1('MINUIT', energyLow, energyUp, 0, 1, analysisType, modelBinnedPW)
+            binAn.setTolerance=0.001
+            preFactor, scale, error, ts = binAn.likelihood1('MINUIT', energyLow, energyUp,0 ,0, analysisType, str(srcName)+"_model_likehoodFit1.xml")
+            flux_buffer=preFactor*((pivot/scale)**(-2))*(1e-13)*(1e6)
             
-
             if ts >= 20:                         # As in MAGIC, the spectral points are plotted if the significance is > 2.
                 
                 energy.append(pivot*(10**(-3))) # -> convert energy from MeV to GeV
-                flux.append(preFactor*(10**-13))
-                print "Prefactor", preFactor
-                E2.append(pivot*pivot*preFactor*(10**-19)) # -> convert flux from MeV to ergs
-                #E2.append(pivot*pivot*preFactor*(10**-19)) # -> convert flux from ergs to TeV
-
-
+                flux.append(preFactor*(((pivot/scale)**(-2))*(1e-13)*(1e6)))
+                E2.append(pivot*pivot*flux_buffer*(10**-12)*1.6) # -> convert flux from MeV to ergs
+                            
+                            
                 ## Computing error bars ##
                 ##
+            
                 print "TSSSSSSSSS", sqrt(ts)
                 exl.append((pivot-energyLow)*(10**(-3)))
                 exh.append((energyUp-pivot)*(10**(-3)))
@@ -198,15 +200,9 @@ def likelihoodFit1(analysisType):
         
     if analysisType==2:
         
-#        like=readLikeXML(200,srcName, srcNameFermi, model, factorLimit)
-#        like.fillSIBinnedPL()
-#        like.fillBkgSrc()
-#        
-#        modelBinnedPW = like.modelOut(srcName, pivot)
-#
         binAn=fermiBinnedAnalysis(srcName, "_"+srcNameFermi, scfile, srcName+'_gti_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                       srcName+'_ltcube_'+PHASEMIN+'_'+PHASEMAX+'.fits',  \
-                                      srcName+'_scrmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
+                                      srcName+'_scrmap_'+PHASEMIN+'_'+PHASEMAX+'.fits',  \
                                       srcName+'_expcube_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                       srcName+'_ccube_'+PHASEMIN+'_'+PHASEMAX+'.fits',   \
                                       IRFS, EBIN, EMIN, EMAX, model)
@@ -218,13 +214,14 @@ def likelihoodFit1(analysisType):
 
 def unbinnedLike():
     unbinAn = fermiUnbinnedAnalysis(srcName, "_"+srcNameFermi, scfile, srcName+'_gti_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
-                                        srcName+'_ltcube_'+PHASEMIN+'_'+PHASEMAX+'.fits',  \
+                                        srcName+'_ltcube_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                         srcName+'_expmap_'+PHASEMIN+'_'+PHASEMAX+'.fits', \
                                         IRFS, EBIN, EMIN, EMAX, model)
 
     unbinAn.unBinnedlikeFit1('DRMNFB', EMIN, EMAX, 0, 1, 0)
     unbinAn.unBinnedlikeFit2('MINUIT', 1)
     unbinAn.unBinnedSED()
+
 
 ###########################################################################################
 #

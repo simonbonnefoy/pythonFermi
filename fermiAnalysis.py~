@@ -170,7 +170,7 @@ def likelihoodFit1(analysisType):
                 energy.append(pivot*(10**(-3))) # -> convert energy from MeV to GeV
                 flux.append(preFactor*(10**-13))
                 print "Prefactor", preFactor
-                E2.append(pivot*pivot*preFactor*(10**-19)/1.6) # -> convert flux from MeV to ergs
+                E2.append(pivot*pivot*preFactor*(10**-19)) # -> convert flux from MeV to ergs
                 #E2.append(pivot*pivot*preFactor*(10**-19)) # -> convert flux from ergs to TeV
 
 

@@ -123,7 +123,7 @@ class readLikeXML:
             if "</source>" in line and flagSource==1 :
                 flagSource=0
 
-                if scale > self.factorLimit:
+                if scale >= self.factorLimit:
                     fileWrite.write(bufferModel)
                 
             i = i+1

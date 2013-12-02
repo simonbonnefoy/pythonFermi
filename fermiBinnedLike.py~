@@ -34,7 +34,7 @@ class fermiBinnedAnalysis:
         obs = BinnedObs(self.srcmapsFile, self.ltcubeFile, self.expcubeFile, irfs=self.irfs)
         
         like1 = BinnedAnalysis(obs,self.model,optimizer=optmz)
-        like1.tol = 0.1
+        like1.tol = 0.01
         like1.setEnergyRange(emin, emax)
         like1.fit(verbosity=1)
         
